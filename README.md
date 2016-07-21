@@ -16,7 +16,7 @@ example
 The following example provides a WS on http://localhost:80/json/switch and
 uses from the posted json the values "address", "unit" and "on":
 
-    server = new Server(80);
+    Server server = new Server(80);
 
     JsonHandler jsonHandler = new JsonHandler();
     jsonHandler.putMapping("/json/switch", JsonRequestSwitch.class
