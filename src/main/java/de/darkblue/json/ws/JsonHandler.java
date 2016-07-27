@@ -21,6 +21,8 @@ package de.darkblue.json.ws;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +41,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
  *
  * @author Florian Frankenberger
  */
-public class JsonHandler extends AbstractHandler {
+class JsonHandler extends AbstractHandler {
 
     private static final Logger LOGGER = Logger.getLogger(JsonHandler.class.getCanonicalName());
 
@@ -62,6 +64,10 @@ public class JsonHandler extends AbstractHandler {
         }
     }
 
+    public JsonHandler() {
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+    }
+
     public <T> void putMapping(String path, Class<T> requestClass, Function<T, Object> requestHandler) {
         this.pathMapping.put(path, new PathInfo<>(requestClass, requestHandler));
     }
@@ -77,12 +83,15 @@ public class JsonHandler extends AbstractHandler {
                 Object value = mapper.readValue(request.getInputStream(), pathInfo.requestClass);
                 Object result = pathInfo.requestHandler.apply(value);
 
+                ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+                mapper.writeValue(bOut, result);
+                bOut.flush();
+                byte[] payload = bOut.toByteArray();
+
                 response.setContentType("application/json;charset=utf-8");
-                if (result != null) {
-                    mapper.writeValue(response.getOutputStream(), result);
-                } else {
-                    mapper.writeValue(response.getOutputStream(), null);
-                }
+                response.setContentLength(payload.length);
+                response.getOutputStream().write(payload);
+
                 response.setStatus(HttpServletResponse.SC_OK);
                 baseRequest.setHandled(true);
             } catch (JsonParseException e) {

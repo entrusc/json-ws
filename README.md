@@ -1,38 +1,42 @@
 JSON-WS
 =======
 
-A simple JAVA library that allows the setup of a JSON WebService over HTTP-POST with
+A simple JAVA library that allows the setup of a JSON WebService over HTTP(S)-POST with
 a few lines of code. This WS implementation does not provide a public descriptor file,
 so this library is more suited for communication between different applications of an
 organisation insted of a public WS API for customers.
+
+This library also contains for convenience a simple to use WebService client.
 
 license
 =======
 json-ws is licensed under LGPL 2.1 and can therefore be used in any project, even
 for commercial ones.
 
+build
+=====
+
+    mvn clean package
+
 example
 =======
-The following example provides a WS on http://localhost:80/json/switch and
-uses from the posted json the values "address", "unit" and "on":
+The following example provides a WS on http://localhost:8080/json/hi
 
-    Server server = new Server(80);
+    @WebService(path = "/json")
+    public static class ServiceImpl {
 
-    JsonHandler jsonHandler = new JsonHandler();
-    jsonHandler.putMapping("/json/switch", JsonRequestSwitch.class
-                , value -> {
-                    switchUnit(value.address, value.unit, value.on);
-                    return null;
-                }
-    );    
+        @WebServiceMethod()
+        public void hi() {
+            System.out.println("Hello World!");
+        }
 
-    HandlerList handlerList = new HandlerList();
-    handlerList.setHandlers(new Handler[] { jsonHandler });
-    server.setHandler(handlerList);
+    }
+    
+    //[...]
 
+    WebServiceServer server = new WebServiceServer();
+    server.setHttpPort(8080);
+    server.addServiceImplementation(new ServiceImpl());
     server.start();
 
-    
-
-
-
+More examples (also on how to use the client) can be found in the test folder.
