@@ -37,6 +37,6 @@ The following example provides a WS on http://localhost:8080/json/hi
     WebServiceServer server = new WebServiceServer();
     server.setHttpPort(8080);
     server.addServiceImplementation(new ServiceImpl());
-    server.start();
+    server.start(true);
 
 More examples (also on how to use the client) can be found in the test folder.

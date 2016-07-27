@@ -101,7 +101,13 @@ public class WebServiceServer {
         }
     }
 
-    public void start() {
+    /**
+     * Starts the server. All configuration should be done before.
+     *
+     * @param join true if you want this call to block until the
+     *             server is shutdown, false otherwise
+     */
+    public void start(boolean join) {
         try {
             LOGGER.info("Starting webservice ...");
 
@@ -163,6 +169,10 @@ public class WebServiceServer {
 
             server.start();
             LOGGER.log(Level.INFO, "\tserver runnning.");
+
+            if (join) {
+                server.join();
+            }
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

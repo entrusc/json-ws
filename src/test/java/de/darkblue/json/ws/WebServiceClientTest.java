@@ -91,7 +91,7 @@ public class WebServiceClientTest {
             res.retName = req.name;
             return res;
         });
-        server.start();
+        server.start(false);
 
         WebServiceClient client = new WebServiceClient();
         SimpleRequest req = new SimpleRequest();
@@ -114,7 +114,7 @@ public class WebServiceClientTest {
         WebServiceServer server = new WebServiceServer();
         server.setHttpPort(33255);
         server.addServiceImplementation(new ServiceImpl());
-        server.start();
+        server.start(false);
 
         WebServiceClient client = new WebServiceClient();
         Service service = client.proxyRemoteService("http://localhost:33255/json", Service.class);
