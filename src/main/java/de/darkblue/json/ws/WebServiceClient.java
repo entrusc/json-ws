@@ -40,6 +40,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -76,7 +77,7 @@ public class WebServiceClient {
      * @throws IOException
      */
     public WebServiceClient() throws IOException {
-        this(null, null);
+        this((InputStream) null, null);
     }
 
     /**
@@ -89,7 +90,24 @@ public class WebServiceClient {
      * @throws IOException
      */
     public WebServiceClient(File trustStoreFile, String trustStorePassword) throws IOException {
-        this(trustStoreFile, trustStorePassword, null);
+        this(new FileInputStream(trustStoreFile), trustStorePassword, null);
+    }
+
+    /**
+     * constructs a ws client that uses the given keystore's certificates to validate the server's
+     * certificate. The common name of the server will be checked according to the default
+     * hostname verifier.
+     *
+     * @param trustStoreIn
+     * @param trustStorePassword
+     * @throws IOException
+     */
+    public WebServiceClient(InputStream trustStoreIn, String trustStorePassword) throws IOException {
+        this(trustStoreIn, trustStorePassword, null);
+    }
+
+    public WebServiceClient(File trustStoreFile, String trustStorePassword, HostnameVerifier hostnameVerifier) throws IOException {
+        this(new FileInputStream(trustStoreFile), trustStorePassword, hostnameVerifier);
     }
 
     /**
@@ -97,15 +115,15 @@ public class WebServiceClient {
      * certificate. The common name of the server will be checked according to the provided hostname
      * verifier.
      *
-     * @param trustStoreFile
+     * @param trustStoreIn
      * @param trustStorePassword
      * @param hostnameVerifier
      * @throws IOException
      */
-    public WebServiceClient(File trustStoreFile, String trustStorePassword, HostnameVerifier hostnameVerifier) throws IOException {
+    public WebServiceClient(InputStream trustStoreIn, String trustStorePassword, HostnameVerifier hostnameVerifier) throws IOException {
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        if (trustStoreFile != null && trustStorePassword != null) {
-            KeyStore trustStore = prepareTrustStore(trustStoreFile, trustStorePassword);
+        if (trustStoreIn != null && trustStorePassword != null) {
+            KeyStore trustStore = prepareTrustStore(trustStoreIn, trustStorePassword);
             this.socketFactory = prepareSocketFactory(trustStore);
         }
         this.hostnameVerifier = hostnameVerifier;
@@ -223,12 +241,12 @@ public class WebServiceClient {
         }
     }
 
-    private KeyStore prepareTrustStore(File trustStoreFile, String trustStorePassword) throws IOException {
-        try (FileInputStream fis = new FileInputStream(trustStoreFile)) {
+    private KeyStore prepareTrustStore(InputStream trustStoreIn, String trustStorePassword) throws IOException {
+        try {
             KeyStore trustStore;
             try {
                 trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                trustStore.load(fis, trustStorePassword.toCharArray());
+                trustStore.load(trustStoreIn, trustStorePassword.toCharArray());
 
                 return trustStore;
             } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException ex) {
@@ -239,6 +257,12 @@ public class WebServiceClient {
                 throw new IllegalArgumentException("Password for store is wrong");
             }
             throw e;
+        } finally {
+            try {
+                trustStoreIn.close();
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "Problem closing trust store input stream", e);
+            }
         }
     }
 
