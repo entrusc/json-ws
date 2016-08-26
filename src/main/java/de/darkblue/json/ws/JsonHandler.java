@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -80,12 +82,14 @@ class JsonHandler extends AbstractHandler {
             final PathInfo<Object> pathInfo = (PathInfo<Object>) pathMapping.get(target);
 
             try {
-                Object value = mapper.readValue(request.getInputStream(), pathInfo.requestClass);
+                GZIPInputStream gzIn = new GZIPInputStream(request.getInputStream());
+                Object value = mapper.readValue(gzIn, pathInfo.requestClass);
                 Object result = pathInfo.requestHandler.apply(value);
 
                 ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-                mapper.writeValue(bOut, result);
-                bOut.flush();
+                GZIPOutputStream gzOut = new GZIPOutputStream(bOut);
+                mapper.writeValue(gzOut, result);
+                gzOut.flush();
                 byte[] payload = bOut.toByteArray();
 
                 response.setContentType("application/json;charset=utf-8");

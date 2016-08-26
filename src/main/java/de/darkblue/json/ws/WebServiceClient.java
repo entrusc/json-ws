@@ -42,6 +42,8 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -166,8 +168,9 @@ public class WebServiceClient {
         httpConnection.setConnectTimeout(5000);
 
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        mapper.writeValue(bOut, parameter);
-        bOut.flush();
+        GZIPOutputStream gzOut = new GZIPOutputStream(bOut);
+        mapper.writeValue(gzOut, parameter);
+        gzOut.flush();
         byte[] payload = bOut.toByteArray();
 
         httpConnection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
@@ -177,7 +180,7 @@ public class WebServiceClient {
             try (OutputStream out = httpConnection.getOutputStream()) {
                 out.write(payload);
 
-                try (InputStream in = httpConnection.getInputStream()) {
+                try (InputStream in = new GZIPInputStream(httpConnection.getInputStream())) {
                     R result = null;
                     if (responseClass != void.class && responseClass != Void.class) {
                         result = mapper.readValue(in, responseClass);
