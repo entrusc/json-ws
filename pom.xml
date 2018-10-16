@@ -5,9 +5,9 @@
     <artifactId>json-ws</artifactId>
     <version>1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    
+
     <name>JSON-WS</name>
-    
+
     <licenses>
         <license>
             <name>
@@ -15,14 +15,14 @@
             </name>
             <url>http://www.gnu.org/licenses/lgpl.html</url>
         </license>
-    </licenses>    
-    
+    </licenses>
+
     <scm>
         <connection>scm:git:https://github.com/entrusc/json-ws</connection>
         <developerConnection>scm:git:https://github.com/entrusc/json-ws</developerConnection>
         <url>scm:git:https://github.com/entrusc/json-ws</url>
-    </scm>   
-    
+    </scm>
+
     <developers>
         <developer>
             <id>entrusc</id>
@@ -37,8 +37,8 @@
             </roles>
             <timezone>+1</timezone>
         </developer>
-    </developers>               
-    
+    </developers>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -51,17 +51,17 @@
             <artifactId>jetty-server</artifactId>
             <version>9.2.6.v20141205</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>18.0</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.4.4</version>
+            <version>[2.8.11.1,)</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
